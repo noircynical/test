@@ -24,18 +24,10 @@
 
     static int index= -1;
     // Do any additional setup after loading the view, typically from a nib.
-//    CGSize scSize= [UIScreen mainScreen].bounds.size;
     [self.navigationController.navigationBar
      setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:255.0/255.0 green:42.0/255.0 blue:150.0/255.0 alpha:1.0]}];
     self.navigationController.navigationBar.translucent = NO;
     self.navigationController.navigationBar.tintColor= [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:0.5];
-    
-    UIImage *buttonImage = [UIImage imageNamed:@"icon_filter"];
-    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [btn setImage:buttonImage forState:UIControlStateNormal];
-    btn.frame = CGRectMake(0, 0, buttonImage.size.width, buttonImage.size.height);
-    UIBarButtonItem *barButton = [[UIBarButtonItem alloc] initWithCustomView:btn];
-    self.navigationItem.rightBarButtonItem = barButton;
     
     [[UITabBar appearance] setTintColor:[UIColor colorWithRed:255.0/255.0 green:42.0/255.0 blue:150.0/255.0 alpha:1.0]];
     
@@ -51,10 +43,8 @@
         NSLog(@"json parsing error");
     else{
         NSArray *banner= json[@"cards"];
-        if(index == -1){
+        if(index == -1)
             index= arc4random()%(banner.count/2);
-            if(index == 4) index++;
-        }
         
         int count= 0;
         for (NSDictionary *item in banner){
@@ -96,24 +86,35 @@
     
 }
 
-- (UIImage *)imageWithImage:(UIImage *)image convertToSize:(CGSize)size {
-//    CGSize scSize= [UIScreen mainScreen].bounds.size;
-    int width= size.width-20;
+-(UIImage*)resizeKeepRatio:(UIImage*)image{
+    CGSize size= CGSizeMake(127, 157);
     UIGraphicsBeginImageContext(size);
-    [image drawInRect:CGRectMake(0, 0, width, width*(image.size.width/image.size.height))];
-    UIImage *destImage = UIGraphicsGetImageFromCurrentImageContext();
+    [image drawInRect:CGRectMake(0, 0, size.width, size.height)];
+    UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    return destImage;
+    
+    return newImage;
+}
+
+- (UIImage*)resizeImageWithImage:(UIImage*)image toSize:(CGSize)newSize
+{
+    CGSize size= CGSizeMake(newSize.width-20, newSize.height);
+    UIGraphicsBeginImageContext(newSize);
+    [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.width*(image.size.width/image.size.height))];
+    UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return newImage;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     return viewItemImages.count;
 }
 
-
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
     Cell *cell= [collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
     [cell.imgView setImage:viewItemImages[indexPath.row]];
+    cell.imgView.layer.cornerRadius= 10.0f;
     [cell.title setText:viewItemTitles[indexPath.row]];
     [cell.score setText:[NSString stringWithFormat:@"%.1f",cell.slider.value]];
     cell.indexPath= indexPath;
@@ -140,10 +141,6 @@
     Cell *cell= [self.collectionView cellForItemAtIndexPath:data.indexPath];
     [cell.score setText:[NSString stringWithFormat:@"%.1f",data.slider.value]];
     [cell.slider setValue:data.slider.value];
-}
-
--(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
-    selected= [self.collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
 }
 
 -(void)collectionView:(UICollectionView *)collectionView didHighlightItemAtIndexPath:(NSIndexPath *)indexPath{
