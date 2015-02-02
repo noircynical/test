@@ -24,11 +24,11 @@
 
     static int index= -1;
     // Do any additional setup after loading the view, typically from a nib.
+//    CGSize scSize= [UIScreen mainScreen].bounds.size;
     [self.navigationController.navigationBar
      setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:255.0/255.0 green:42.0/255.0 blue:150.0/255.0 alpha:1.0]}];
     self.navigationController.navigationBar.translucent = NO;
     self.navigationController.navigationBar.tintColor= [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:0.5];
-    
     [[UITabBar appearance] setTintColor:[UIColor colorWithRed:255.0/255.0 green:42.0/255.0 blue:150.0/255.0 alpha:1.0]];
     
     viewItemImages= [[NSMutableArray alloc] initWithCapacity:15];
@@ -53,16 +53,23 @@
                 temp= [item objectForKey:@"movie"];
                 NSLog(@"movie title: %@", temp[@"title"]);
                 if([temp[@"stillcut"] rangeOfString:@"assets"].location == NSNotFound){
-                    NSURL *url= [NSURL URLWithString:temp[@"stillcut"]];
-                    NSData *stillcut= [NSData dataWithContentsOfURL:url];
-                    UIImage *img=[[UIImage alloc] initWithData:stillcut];
-                    [viewItemImages addObject:img];
-                    [viewItemTitles addObject:[temp[@"title"] copy]];
+                    NSString *str= [temp[@"stillcut"] copy];
+                    if([str rangeOfString:@"d12n550ohk75u3"].location != NSNotFound){
+                        NSURL *url= [NSURL URLWithString:str];
+                        NSData *stillcut= [NSData dataWithContentsOfURL:url];
+                        UIImage *img=[[UIImage alloc] initWithData:stillcut];
+//                        if(img.size.width > img.size.height)
+//                            img= [self resizeImageWithImage:img toSize:scSize];
+//                        else
+//                            img= [self resizeKeepRatio:img];
+                        [viewItemImages addObject:img];
+                        [viewItemTitles addObject:[temp[@"title"] copy]];
+                    }
+                    
                 }
             }
             else if(count == (index*2+1) && item[@"movies"] != nil){
                 NSArray *movies= [item objectForKey:@"movies"];
-                NSLog(@"type is %@", item[@"type"]);
                 for(NSDictionary *inItems in movies){
                     NSLog(@"movies item name : %@", inItems[@"title"]);
                     NSString *str;
@@ -70,11 +77,14 @@
                         str= [inItems[@"poster"] copy];
                     else
                         str= [inItems[@"stillcut"] copy];
-
                     if([str rangeOfString:@"d12n550ohk75u3"].location != NSNotFound){
                         NSURL *url= [NSURL URLWithString:str];
                         NSData *stillcut= [NSData dataWithContentsOfURL:url];
                         UIImage *img=[[UIImage alloc] initWithData:stillcut];
+//                        if(img.size.width > img.size.height)
+//                            img= [self resizeImageWithImage:img toSize:scSize];
+//                        else
+//                            img= [self resizeKeepRatio:img];
                         [viewItemImages addObject:img];
                         [viewItemTitles addObject:[inItems[@"title"] copy]];
                     }
@@ -86,30 +96,31 @@
     
 }
 
--(UIImage*)resizeKeepRatio:(UIImage*)image{
-    CGSize size= CGSizeMake(127, 157);
-    UIGraphicsBeginImageContext(size);
-    [image drawInRect:CGRectMake(0, 0, size.width, size.height)];
-    UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    return newImage;
-}
-
-- (UIImage*)resizeImageWithImage:(UIImage*)image toSize:(CGSize)newSize
-{
-    CGSize size= CGSizeMake(newSize.width-20, newSize.height);
-    UIGraphicsBeginImageContext(newSize);
-    [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.width*(image.size.width/image.size.height))];
-    UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    return newImage;
-}
+//-(UIImage*)resizeKeepRatio:(UIImage*)image{
+//    CGSize size= CGSizeMake(143, 165);
+//    UIGraphicsBeginImageContext(size);
+//    [image drawInRect:CGRectMake(0, 0, size.width, size.height)];
+//    UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+//    UIGraphicsEndImageContext();
+//    
+//    return newImage;
+//}
+//
+//- (UIImage*)resizeImageWithImage:(UIImage*)image toSize:(CGSize)newSize
+//{
+//    CGSize size= CGSizeMake(newSize.width-20, newSize.height);
+//    UIGraphicsBeginImageContext(newSize);
+//    [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.width*(image.size.width/image.size.height))];
+//    UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+//    UIGraphicsEndImageContext();
+//    
+//    return newImage;
+//}
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     return viewItemImages.count;
 }
+
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
     Cell *cell= [collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
@@ -142,6 +153,15 @@
     [cell.score setText:[NSString stringWithFormat:@"%.1f",data.slider.value]];
     [cell.slider setValue:data.slider.value];
 }
+
+//- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+//    UIImage *img= viewItemImages[indexPath.row];
+//    return img.size;
+//}
+//
+//-(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+//    selected= [self.collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
+//}
 
 -(void)collectionView:(UICollectionView *)collectionView didHighlightItemAtIndexPath:(NSIndexPath *)indexPath{
     UICollectionViewCell* cell = [collectionView cellForItemAtIndexPath:indexPath];

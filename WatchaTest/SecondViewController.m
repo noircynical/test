@@ -7,7 +7,6 @@
 //
 
 #import "SecondViewController.h"
-//#import "Cell.h"
 
 @interface SecondViewController ()
 @end
